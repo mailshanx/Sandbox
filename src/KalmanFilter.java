@@ -40,10 +40,10 @@ public class KalmanFilter {
 	public void measurementUpdate(Double _measurement){
 		gain=stateCov_aPriori/(stateCov_aPriori+R);
 		aPosterioriEst=aPrioriEst+(gain*(_measurement-aPrioriEst));
-		if(aPosterioriEst<0.0)
-			aPosterioriEst=0.0;
-		if(aPosterioriEst>1.0)
-			aPosterioriEst=1.0;
+//		if(aPosterioriEst<0.0)
+//			aPosterioriEst=0.0;
+//		if(aPosterioriEst>1.0)
+//			aPosterioriEst=1.0;
 		stateCov_aPosteriori=(1-gain)*stateCov_aPriori;
 	}
 

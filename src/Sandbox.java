@@ -5,19 +5,18 @@ import java.math.*;
 
 
 public class Sandbox {
-	KalmanFilter kf;
-	GittinsIndexGenerator gittins_index_generator;
 	public Sandbox(){
 		Out out=new Out("estimates.txt");
 		Double refMean=0.05;
 		Double refStdDev=0.1;
 		Double Tc=0.7;
 		KalmanFilter testpkt_filter=new KalmanFilter(1.0);
+		KalmanFilter datapkt_filter=new KalmanFilter(1.0);
+		KalmanFilter kf = new KalmanFilter(1.0);
 		Integer pktlen=100;
 		Double k;
 		Integer n=pktlen;
-		gittins_index_generator=new GittinsIndexGenerator();
-		int measureLength=1000;
+		int measureLength=100;
 		Random rand=new Random();
 		List<Double> measurement_store = new ArrayList<Double>();
 		for (int i = 0; i < measureLength; i++) {
@@ -32,10 +31,17 @@ public class Sandbox {
 		
 		for(Double ber: measurement_store){
 			k=pktlen*ber;
+			Double testpkt_measurement=f((k/n));
+			
 			testpkt_filter.performTimeUpdate();
 			testpkt_filter.setR(getTestPktVariance(k, n));
-			testpkt_filter.measurementUpdate(f((double) (k/n)));
-			System.out.println(ber+" "+k+" "+n+" "+fPrime((double) (k/n))+" "+getTestPktVariance(k, n)+" "+testpkt_filter.getEstimate());
+			testpkt_filter.measurementUpdate(testpkt_measurement);
+			
+			kf.performTimeUpdate();
+			kf.measurementUpdate(ber);
+			
+			System.out.println(testpkt_measurement+" "+testpkt_filter.getEstimate()+" "+kf.getEstimate());
+			out.println(testpkt_measurement+" "+testpkt_filter.getEstimate()+" "+kf.getEstimate());
 		}
 		
 	}
@@ -49,7 +55,7 @@ public class Sandbox {
 	}
 	
 	private Double getTestPktVariance(double k, double n){
-		return (k/(n*n))*(1-(k/n))*fPrime((double) (k/n));
+		return (k/(n*n))*(1-(k/n))*fPrime((k/n));
 	}
 	
 	private Double f(Double _theta){
